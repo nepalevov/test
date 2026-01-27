@@ -6,6 +6,6 @@ huh
 
 <!-- x-release-please-start-version -->
 ```console
-docker run --rm nepalevov/test:v0.0.1-alpine
+docker run --rm nepalevov/test:v0.1.0
 ```
 <!-- x-release-please-end -->
