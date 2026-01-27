@@ -1,0 +1,56 @@
+name: Publish Container Images
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  find-files:
+    name: Find Dockerfiles to build
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          dockerfiles=$(find . -type f -name 'Dockerfile')
+          matrix=$(echo "$dockerfiles" | jq -R -s -c 'split("\n")[:-1] | map({file: ., context: (. | gsub("/Dockerfile$"; ""))})')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    name: Build ${{ matrix.dockerfile.context }}
+    needs: find-files
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile: ${{ fromJson(needs.find-files.outputs.matrix) }}
+      fail-fast: false
+    env:
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: |
+            ${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,prefix=${{ matrix.dockerfile.context }}-,pattern={{version}}
+      - run: |
+          echo "Building Dockerfile ${{ matrix.dockerfile.file }} in context ${{ matrix.dockerfile.context }}"
+          echo "version: ${{ steps.meta.outputs.version }}"
+          echo "tags: ${{ steps.meta.outputs.tags }}"
+          echo "tag-names: ${{ steps.meta.outputs.tag-names }}"
+          echo "labels: ${{ steps.meta.outputs.labels }}"
+          echo "annotations: ${{ steps.meta.outputs.annotations }}"
+          echo "json: ${{ steps.meta.outputs.json }}"
