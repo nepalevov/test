@@ -45,12 +45,4 @@ jobs:
           images: |
             ${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,prefix=${{ matrix.dockerfile.context }}-,pattern={{version}}
-      - run: |
-          echo "Building Dockerfile ${{ matrix.dockerfile.file }} in context ${{ matrix.dockerfile.context }}"
-          echo "version: ${{ steps.meta.outputs.version }}"
-          echo "tags: ${{ steps.meta.outputs.tags }}"
-          echo "tag-names: ${{ steps.meta.outputs.tag-names }}"
-          echo "labels: ${{ steps.meta.outputs.labels }}"
-          echo "annotations: ${{ steps.meta.outputs.annotations }}"
-          echo "json: ${{ steps.meta.outputs.json }}"
+            type=semver,pattern={{version}},suffix=-${{ matrix.dockerfile.context }}
