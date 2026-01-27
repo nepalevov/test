@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/nepalevov/test/compare/v0.1.0...v0.1.0) (2026-01-27)
+
+
+### Miscellaneous Chores
+
+* release 0.1.0 ([bcfef4d](https://github.com/nepalevov/test/commit/bcfef4dbc7ef2238ba7e7eb1573f68a70282d9ba))
+
 ## [0.1.0](https://github.com/nepalevov/test/compare/v0.0.1...v0.1.0) (2026-01-27)
 
 
