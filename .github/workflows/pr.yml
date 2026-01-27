@@ -27,5 +27,11 @@ jobs:
           matrix: true
       - run: |
           echo "all_changed_files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "dockerfiles_all_changed_files: ${{ steps.changed-files.outputs.dockerfiles_all_changed_files }}"
+          echo "workflows_all_changed_files: ${{ steps.changed-files.outputs.workflows_all_changed_files }}"
           echo "any_changed: ${{ steps.changed-files.outputs.any_changed }}"
+          echo "dockerfiles_any_changed: ${{ steps.changed-files.outputs.dockerfiles_any_changed }}"
+          echo "workflows_any_changed: ${{ steps.changed-files.outputs.workflows_any_changed }}"
           echo "changed_keys: ${{ steps.changed-files.outputs.changed_keys }}"
+          echo "dockerfiles_changed_keys: ${{ steps.changed-files.outputs.dockerfiles_changed_keys }}"
+          echo "workflows_changed_keys: ${{ steps.changed-files.outputs.workflows_changed_keys }}"
