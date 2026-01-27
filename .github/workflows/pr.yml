@@ -19,7 +19,7 @@ jobs:
         with:
           files_yaml: |
             dockerfiles:
-              - **/Dockerfile
+              - '**/Dockerfile'
             workflows:
               - .github/workflows/*.yml
           dir_names: true
