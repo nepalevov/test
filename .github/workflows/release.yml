@@ -1,0 +1,19 @@
+name: Release Workflow
+
+on:
+  push:
+    branches: [development, release-*]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    uses: nepalevov/ci/.github/workflows/node_release.yml@main
+    secrets: inherit
+    with:
+      node-version: "24"
+      maximize-build-space: false
+      ort-enabled: false
+      trivy-enabled: false
