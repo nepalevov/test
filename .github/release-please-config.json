@@ -4,6 +4,7 @@
       "package-name": "test",
       "release-type": "simple",
       "draft": false,
+      "include-component-in-tag": false,
       "extra-files": [
         "README.md"
       ]
