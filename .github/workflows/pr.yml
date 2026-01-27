@@ -39,6 +39,13 @@ jobs:
           fi
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
           echo "any_changed=$([[ "$matrix" != "[]" ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+      - run: |
+          echo "dockerfiles_all_changed_files: ${{ steps.changed-files.outputs.dockerfiles_all_changed_files }}"
+          echo "workflows_all_changed_files: ${{ steps.changed-files.outputs.workflows_all_changed_files }}"
+          echo "dockerfiles_any_changed: ${{ steps.changed-files.outputs.dockerfiles_any_changed }}"
+          echo "workflows_any_changed: ${{ steps.changed-files.outputs.workflows_any_changed }}"
+          echo "changed_keys: ${{ steps.changed-files.outputs.changed_keys }}"
+          echo "matrix: ${{ steps.set-matrix.outputs.matrix }}"
 
   build:
     name: Build ${{ matrix.dockerfile.context }}
