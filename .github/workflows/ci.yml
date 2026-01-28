@@ -1,0 +1,89 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-matrix:
+    name: Define build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+          persist-credentials: false
+      - name: Get changed Dockerfiles
+        if: github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        with:
+          files: "**/Dockerfile"
+          separator: "\n"
+      - name: Get all Dockerfiles
+        if: github.event_name != 'pull_request'
+        id: files
+        run: |
+          files=$(find . -type f -name 'Dockerfile')
+          echo "$files" | tee -a $GITHUB_OUTPUT
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          #!/bin/bash
+          matrix='[]'
+          if [[ -n "$FILES" ]]; then
+            # Generate json suitable for matrix, e.g.:
+            # '[{"file": "one/Dockerfile", "path": "one", "name": "one"},{"file": "foo/bar/Dockerfile", "path": "foo/bar", "name": "bar"}]'
+            matrix=$(echo "$FILES" | jq -R -s -c 'split("\n")[:-1] | map({file: ., path: (. | split("/")[:-1] | join("/")), name: (. | split("/")[-2])})')
+          fi
+          echo "matrix=$matrix" | tee -a $GITHUB_OUTPUT
+        env:
+          FILES: ${{ steps.changed-files.outputs.all_changed_files || steps.files.outputs.files }}
+        shell: bash
+
+  build:
+    name: Build ${{ matrix.dockerfile.name }}
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      fail-fast: false
+    env:
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          flavor: |
+            suffix=-${{ matrix.dockerfile.name }},onlatest=true
+          images: |
+            ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}"
+      - name: Build
+        run: |
+          # TODO: use docker/build-push-action instead of this mock
+          echo "Building Dockerfile ${{ matrix.dockerfile.file }} in directory ${{ matrix.dockerfile.path }}"
+          echo "export: true"
+      - name: Run Trivy vulnerability scanner
+        run: |
+          # TODO: use aquasecurity/trivy-action instead of this mock
+          echo "Scanning images: ${{ steps.meta.outputs.tags }}"
+      - name: Push
+        run: |
+          # TODO: use docker/build-push-action instead of this mock
+          echo "Pushing images: ${{ steps.meta.outputs.tags }}"
+          echo "push: ${{ github.event_name != 'pull_request' }}"
