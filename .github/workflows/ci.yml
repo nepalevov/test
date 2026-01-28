@@ -49,6 +49,7 @@ jobs:
   build:
     name: Build ${{ matrix.dockerfile.name }}
     needs: build-matrix
+    if: ${{ fromJson(needs.build-matrix.outputs.matrix) != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
