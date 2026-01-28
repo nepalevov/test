@@ -26,7 +26,8 @@ jobs:
         id: set-matrix
         run: |
           if [[ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]]; then
-            matrix=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -c 'map({file: ., dir: (. | gsub("/Dockerfile$"; ""))})')
+            # e.g. '[{"file": "one/Dockerfile", "path": "one", "name": "one"},{"file": "foo/bar/Dockerfile", "path": "foo/bar", "name": "bar"}]'
+            matrix=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -c 'map({file: ., path: (. | split("/")[:-1] | join("/")), name: (. | split("/")[-2])})')
           else
             matrix='[]'
           fi
@@ -34,7 +35,7 @@ jobs:
           echo "any_changed=${{ steps.changed-files.outputs.any_changed }}" | tee -a $GITHUB_OUTPUT
 
   build:
-    name: Build ${{ matrix.dockerfile.dir }}
+    name: Build ${{ matrix.dockerfile.name }}
     needs: build-matrix
     if: needs.build-matrix.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
@@ -49,4 +50,4 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - run: echo "Building Dockerfile ${{ matrix.dockerfile.file }} in directory ${{ matrix.dockerfile.dir }}"
+      - run: echo "Building Dockerfile ${{ matrix.dockerfile.file }} in directory ${{ matrix.dockerfile.path }}"

@@ -21,14 +21,14 @@ jobs:
         run: |
           dockerfiles=$(find . -type f -name 'Dockerfile')
           if [[ -n "$dockerfiles" ]]; then
-            matrix=$(echo "$dockerfiles" | jq -R -s -c 'split("\n")[:-1] | map({file: ., dir: (. | gsub("/Dockerfile$"; ""))})')
+            matrix=$(echo "$dockerfiles" | jq -R -s -c 'split("\n")[:-1] | map({file: ., path: (. | split("/")[:-1] | join("/")), name: (. | split("/")[-2])})')
           else
             matrix='[]'
           fi
           echo "matrix=$matrix" | tee -a $GITHUB_OUTPUT
 
   build-and-push:
-    name: Build ${{ matrix.dockerfile.dir }}
+    name: Build ${{ matrix.dockerfile.name }}
     needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
@@ -46,9 +46,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
+          flavor: |
+            suffix=${{ matrix.dockerfile.name }},onlatest=true
           images: |
             ${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},suffix=${{ matrix.dockerfile.dir }}
-          # TODO: major + minor
-          # TODO: latest
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
