@@ -49,6 +49,6 @@ jobs:
           images: |
             ${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},suffix=${{ matrix.dockerfile.context }}
+            type=semver,pattern={{version}},suffix=${{ matrix.dockerfile.dir }}
           # TODO: major + minor
           # TODO: latest
