@@ -5,6 +5,13 @@
 
 ### Miscellaneous Chores
 
+* huh ([5a774df](https://github.com/nepalevov/test/commit/5a774df2f8cb3663f426ecc314a4fd7e4ec2a1c2))
+
+## [0.1.0](https://github.com/nepalevov/test/compare/v0.1.0...v0.1.0) (2026-01-28)
+
+
+### Miscellaneous Chores
+
 * release 0.1.0 ([53fc3c3](https://github.com/nepalevov/test/commit/53fc3c3f5051fa4347464e6afaafbf712a22386a))
 * release 0.1.0 ([2738c97](https://github.com/nepalevov/test/commit/2738c9751db86235a4d9f46d949d6312827fb17c))
 * release 0.1.0 ([bcfef4d](https://github.com/nepalevov/test/commit/bcfef4dbc7ef2238ba7e7eb1573f68a70282d9ba))
