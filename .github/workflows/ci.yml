@@ -83,23 +83,29 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
       - name: Build
+        id: build
         run: |
           # TODO: use docker/build-push-action instead of this mock
           echo "Building Dockerfile ${{ matrix.dockerfile.file }} in directory ${{ matrix.dockerfile.path }}"
+          echo "tags: ${{ steps.meta.outputs.tags }}"
           echo "export: true"
+          echo "imageid=sha256:dummyimageid" | tee -a $GITHUB_OUTPUT
       - name: Run Trivy vulnerability scanner
         run: |
           # TODO: use aquasecurity/trivy-action instead of this mock
-          echo "Scanning images: ${{ steps.meta.outputs.tags }}"
+          echo "Scanning image with Trivy"
+          echo "image-ref: ${{ steps.build.outputs.imageid }}"
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
         run: |
           # TODO: use docker/login-action instead of this mock
           echo "Logging in to DockerHub"
-          echo: "username: ${{ secrets.DOCKERHUB_USERNAME }}"
-          echo: "password: ${{ secrets.DOCKERHUB_PASSWORD }}"
+          echo "username: ${{ secrets.DOCKERHUB_USERNAME }}"
+          echo "password: ${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: Push
+        if: github.event_name != 'pull_request'
         run: |
           # TODO: use docker/build-push-action instead of this mock
-          echo "Pushing images: ${{ steps.meta.outputs.tags }}"
-          echo "push: ${{ github.event_name != 'pull_request' }}"
+          echo "Pushing image"
+          echo "tags: ${{ steps.meta.outputs.tags }}"
+          echo "push: true"
