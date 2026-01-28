@@ -1,4 +1,4 @@
-name: Publish Container Images
+name: Publish Workflow
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - "v*"
 
 jobs:
-  find-files:
-    name: Find Dockerfiles to build
+  build-matrix:
+    name: Define build matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -20,16 +20,20 @@ jobs:
         id: set-matrix
         run: |
           dockerfiles=$(find . -type f -name 'Dockerfile')
-          matrix=$(echo "$dockerfiles" | jq -R -s -c 'split("\n")[:-1] | map({file: ., context: (. | gsub("/Dockerfile$"; ""))})')
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+          if [[ -n "$dockerfiles" ]]; then
+            matrix=$(echo "$dockerfiles" | jq -R -s -c 'split("\n")[:-1] | map({file: ., dir: (. | gsub("/Dockerfile$"; ""))})')
+          else
+            matrix='[]'
+          fi
+          echo "matrix=$matrix" | tee -a $GITHUB_OUTPUT
 
   build-and-push:
-    name: Build ${{ matrix.dockerfile.context }}
-    needs: find-files
+    name: Build ${{ matrix.dockerfile.dir }}
+    needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dockerfile: ${{ fromJson(needs.find-files.outputs.matrix) }}
+        dockerfile: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
       fail-fast: false
     env:
       IMAGE_NAME: ${{ github.repository }}
@@ -45,4 +49,6 @@ jobs:
           images: |
             ${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},suffix=-${{ matrix.dockerfile.context }}
+            type=semver,pattern={{version}},suffix=${{ matrix.dockerfile.context }}
+          # TODO: major + minor
+          # TODO: latest

@@ -4,8 +4,8 @@ on:
   pull_request:
 
 jobs:
-  changed-files:
-    name: Get changed files
+  build-matrix:
+    name: Define build matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -26,24 +26,27 @@ jobs:
         id: set-matrix
         run: |
           if [[ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]]; then
-            matrix=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -c 'map({file: ., context: (. | gsub("/Dockerfile$"; ""))})')
+            matrix=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -c 'map({file: ., dir: (. | gsub("/Dockerfile$"; ""))})')
           else
             matrix='[]'
           fi
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
-          echo "any_changed=${{ steps.changed-files.outputs.any_changed }}" >> $GITHUB_OUTPUT
+          echo "matrix=$matrix" | tee -a $GITHUB_OUTPUT
+          echo "any_changed=${{ steps.changed-files.outputs.any_changed }}" | tee -a $GITHUB_OUTPUT
 
   build:
-    name: Build ${{ matrix.dockerfile.context }}
-    needs: changed-files
-    if: needs.changed-files.outputs.any_changed == 'true'
+    name: Build ${{ matrix.dockerfile.dir }}
+    needs: build-matrix
+    if: needs.build-matrix.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dockerfile: ${{ fromJson(needs.changed-files.outputs.matrix) }}
+        dockerfile: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      fail-fast: false
+    env:
+      IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - run: echo "Building Dockerfile ${{ matrix.dockerfile.file }} in context ${{ matrix.dockerfile.context }}"
+      - run: echo "Building Dockerfile ${{ matrix.dockerfile.file }} in directory ${{ matrix.dockerfile.dir }}"
