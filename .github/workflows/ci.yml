@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      is_found: ${{ steps.set-matrix.outputs.is_found }}
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -36,12 +37,15 @@ jobs:
         run: |
           #!/bin/bash
           matrix='[]'
+          is_found=false
           if [[ -n "$FILES" ]]; then
             # Generate json suitable for matrix, e.g.:
             # '[{"file": "one/Dockerfile", "path": "one", "name": "one"},{"file": "foo/bar/Dockerfile", "path": "foo/bar", "name": "bar"}]'
             matrix=$(echo "$FILES" | jq -R -s -c 'split("\n")[:-1] | map({file: ., path: (. | split("/")[:-1] | join("/")), name: (. | split("/")[-2])})')
+            is_found=true
           fi
           echo "matrix=$matrix" | tee -a $GITHUB_OUTPUT
+          echo "is_found=$is_found" | tee -a $GITHUB_OUTPUT
         env:
           FILES: ${{ steps.changed-files.outputs.all_changed_files || steps.files.outputs.files }}
         shell: bash
@@ -49,7 +53,7 @@ jobs:
   build:
     name: Build ${{ matrix.dockerfile.name }}
     needs: build-matrix
-    if: ${{ fromJson(needs.build-matrix.outputs.matrix) != '[]' }}
+    if: ${{ needs.build-matrix.outputs.is_found == 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
