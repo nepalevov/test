@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           lfs: true
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
       - uses: nepalevov/ci/actions/dummy@main
       - name: Setup debug session
         uses: owenthereal/action-upterm@v1
