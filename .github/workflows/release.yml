@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug mode"
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -15,7 +21,8 @@ jobs:
         with:
           lfs: true
       - uses: nepalevov/ci/actions/dummy@main
-      - name: Setup tmate session
+      - name: Setup debug session
         uses: owenthereal/action-upterm@v1
+        if: ${{ inputs.debug }}
         with:
           limit-access-to-actor: true
