@@ -16,6 +16,6 @@ jobs:
           lfs: true
       - uses: nepalevov/ci/actions/dummy@main
       - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+        uses: owenthereal/action-upterm@v1
         with:
           limit-access-to-actor: true
