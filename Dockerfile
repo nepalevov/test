@@ -1,3 +1,3 @@
-FROM epam/epam/ai-dial-chat-themes:latest
+FROM epam/ai-dial-chat-themes:latest
 
 RUN echo "Hello, DIAL!"
