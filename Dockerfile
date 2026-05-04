@@ -1,2 +1,3 @@
-FROM alpine:latest
-CMD ["echo", "Hello, World!"]
+FROM epam/ai-dial-chat-themes:latest
+
+RUN echo "Hello, DIAL!"
