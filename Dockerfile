@@ -2,8 +2,8 @@ FROM debian:bookworm-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# By default: 15 layers * 45 seconds = 11m15s of sleep alone.
-ARG BUILD_DELAY_SECONDS=45
+# By default: 10 layers * 30 seconds = 5 minutes build time
+ARG BUILD_DELAY_SECONDS=30
 ARG PAYLOAD_MB_PER_LAYER=48
 
 WORKDIR /heavy-build
@@ -75,36 +75,6 @@ RUN mkdir -p /heavy-build/layer10 \
     && dd if=/dev/urandom of=/heavy-build/layer10/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
     && sha256sum /heavy-build/layer10/payload.bin > /heavy-build/layer10/payload.sha256 \
     && gzip -9 /heavy-build/layer10/payload.bin \
-    && sleep "${BUILD_DELAY_SECONDS}"
-
-RUN mkdir -p /heavy-build/layer11 \
-    && dd if=/dev/urandom of=/heavy-build/layer11/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
-    && sha256sum /heavy-build/layer11/payload.bin > /heavy-build/layer11/payload.sha256 \
-    && gzip -9 /heavy-build/layer11/payload.bin \
-    && sleep "${BUILD_DELAY_SECONDS}"
-
-RUN mkdir -p /heavy-build/layer12 \
-    && dd if=/dev/urandom of=/heavy-build/layer12/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
-    && sha256sum /heavy-build/layer12/payload.bin > /heavy-build/layer12/payload.sha256 \
-    && gzip -9 /heavy-build/layer12/payload.bin \
-    && sleep "${BUILD_DELAY_SECONDS}"
-
-RUN mkdir -p /heavy-build/layer13 \
-    && dd if=/dev/urandom of=/heavy-build/layer13/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
-    && sha256sum /heavy-build/layer13/payload.bin > /heavy-build/layer13/payload.sha256 \
-    && gzip -9 /heavy-build/layer13/payload.bin \
-    && sleep "${BUILD_DELAY_SECONDS}"
-
-RUN mkdir -p /heavy-build/layer14 \
-    && dd if=/dev/urandom of=/heavy-build/layer14/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
-    && sha256sum /heavy-build/layer14/payload.bin > /heavy-build/layer14/payload.sha256 \
-    && gzip -9 /heavy-build/layer14/payload.bin \
-    && sleep "${BUILD_DELAY_SECONDS}"
-
-RUN mkdir -p /heavy-build/layer15 \
-    && dd if=/dev/urandom of=/heavy-build/layer15/payload.bin bs=1M count=${PAYLOAD_MB_PER_LAYER} status=none \
-    && sha256sum /heavy-build/layer15/payload.bin > /heavy-build/layer15/payload.sha256 \
-    && gzip -9 /heavy-build/layer15/payload.bin \
     && sleep "${BUILD_DELAY_SECONDS}"
 
 EXPOSE 8080
